@@ -3,20 +3,20 @@ name: domain-scout
 description: >
   도메인 컨텍스트를 파악할 때 사용.
   카탈로그(src/catalog/)에서 구조적 관계를 조회하고,
-  docs/<scope>/에서 개념별 서사를 읽어 요약을 반환한다.
+  scope별 docs 디렉터리에서 개념별 서사를 읽어 요약을 반환한다.
   새 작업을 시작하거나, 특정 모델/제약사항의 맥락을 이해해야 할 때 호출.
 ---
 
 ## 절차
 
-1. `from src.catalog import CATALOG`를 기준으로 대상 ID(E-01, INV-03, P-005 등)에 해당하는 객체를 찾는다.
+1. `from src.catalog import CATALOG`를 기준으로 대상 ID(order_model_order, order_constraint_money_amount_non_negative, order_property_batch_allocation_idempotent 등)에 해당하는 객체를 찾는다.
 2. 찾은 객체의 필드에서 관련 ID 목록을 수집한다:
    - DomainModel: `.constraints`, `.properties`, `.events`, `.depends_on`, `.doc_file`
-   - Constraint: `.applies_to`, `.properties`, `CATALOG.doc_files_for_constraint(id)`
-   - Property: `.source`, `.models`, `.test_file`, `CATALOG.doc_files_for_property(id)`
+   - Constraint: 역참조로 연결된 모델 목록, `CATALOG.doc_files_for_constraint(id)`
+   - Property: `.source`, `.test_file`, `CATALOG.doc_files_for_property(id)`
 3. 문서 경로는 `docs/index.md`의 Scope Registry와 카탈로그의 `doc_file`을 우선 사용한다.
 4. 필요한 `docs/<scope>/*.md`만 읽어 필드·불변 조건·정책·이벤트·Property 관점을 파악한다.
-   - 여러 모델에 걸친 제약(POL-03 등)은 `CATALOG.doc_files_for_constraint(id)`로 여러 문서를 함께 읽는다.
+   - 여러 모델에 걸친 제약(order_constraint_order_cancellation_releases_allocations 등)은 `CATALOG.doc_files_for_constraint(id)`로 여러 문서를 함께 읽는다.
 5. 카탈로그의 `test_file` 필드로 테스트 파일 존재 여부를 확인한다.
 6. `src/domain/`에서 관련 구현 코드가 있는지 확인한다.
 

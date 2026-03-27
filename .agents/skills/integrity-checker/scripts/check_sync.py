@@ -74,67 +74,44 @@ def check(project_root: Path | None = None) -> dict:
             results["doc_errors"].append(
                 f"{model.id}.doc_file → missing file: {model.doc_file}"
             )
-        for cid in model.constraints:
-            if cid not in catalog_constraint_ids:
+        for constraint in model.constraints:
+            if constraint.id not in catalog_constraint_ids:
                 results["catalog_errors"].append(
-                    f"{model.id}.constraints → {cid} not defined in catalog"
+                    f"{model.id}.constraints → {constraint.id} not defined in catalog"
                 )
-        for pid in model.properties:
-            if pid not in catalog_property_ids:
+        for prop in model.properties:
+            if prop.id not in catalog_property_ids:
                 results["catalog_errors"].append(
-                    f"{model.id}.properties → {pid} not defined in catalog"
+                    f"{model.id}.properties → {prop.id} not defined in catalog"
                 )
-        for eid in model.events:
-            if eid not in catalog_event_ids:
+        for event in model.events:
+            if event.id not in catalog_event_ids:
                 results["catalog_errors"].append(
-                    f"{model.id}.events → {eid} not defined in catalog"
+                    f"{model.id}.events → {event.id} not defined in catalog"
                 )
-        for did in model.depends_on:
-            if did not in catalog_model_ids:
+        for dependency in model.depends_on:
+            if dependency.id not in catalog_model_ids:
                 results["catalog_errors"].append(
-                    f"{model.id}.depends_on → {did} not defined in catalog"
-                )
-
-    for constraint in CATALOG.constraints:
-        for mid in constraint.applies_to:
-            if mid not in catalog_model_ids:
-                results["catalog_errors"].append(
-                    f"{constraint.id}.applies_to → {mid} not defined in catalog"
-                )
-        for pid in constraint.properties:
-            if pid not in catalog_property_ids:
-                results["catalog_errors"].append(
-                    f"{constraint.id}.properties → {pid} not defined in catalog"
+                    f"{model.id}.depends_on → {dependency.id} not defined in catalog"
                 )
 
     for prop in CATALOG.properties:
-        for cid in prop.source:
-            if cid not in catalog_constraint_ids:
+        if not prop.source:
+            results["orphan_ids"].append(
+                f"{prop.id} — in catalog but not linked to any constraint"
+            )
+        for constraint in prop.source:
+            if constraint.id not in catalog_constraint_ids:
                 results["catalog_errors"].append(
-                    f"{prop.id}.source → {cid} not defined in catalog"
-                )
-        for mid in prop.models:
-            if mid not in catalog_model_ids:
-                results["catalog_errors"].append(
-                    f"{prop.id}.models → {mid} not defined in catalog"
-                )
-
-    for event in CATALOG.events:
-        for mid in event.related_models:
-            if mid not in catalog_model_ids:
-                results["catalog_errors"].append(
-                    f"{event.id}.related_models → {mid} not defined in catalog"
+                    f"{prop.id}.source → {constraint.id} not defined in catalog"
                 )
 
-    # ── Check 2: 카탈로그 ↔ 제약사항 양방향 일관성 ──────────
-    # 제약사항이 연결한 property가 역으로 그 제약사항을 source로 가리키는지 확인
-    for constraint in CATALOG.constraints:
-        for pid in constraint.properties:
-            prop = next((p for p in CATALOG.properties if p.id == pid), None)
-            if prop is not None and constraint.id not in prop.source:
-                results["catalog_errors"].append(
-                    f"{constraint.id} → {pid}: property.source does not include {constraint.id}"
-                )
+    # ── Check 2: Property.source → Constraint/Model 추적 가능성 ──────────
+    for prop in CATALOG.properties:
+        if not CATALOG.models_for_property(prop.id):
+            results["catalog_errors"].append(
+                f"{prop.id} → source constraints do not resolve to any model"
+            )
 
     # ── Check 3: Property test_file 존재 여부 ───────────────
     for prop in CATALOG.properties:
@@ -173,14 +150,7 @@ def check(project_root: Path | None = None) -> dict:
             f"{cid} — referenced in code but not in catalog"
         )
 
-    # ── Check 6: 고아 Property (어떤 Constraint도 참조 안 함) ─
-    linked_prop_ids = {pid for c in CATALOG.constraints for pid in c.properties}
-    for pid in sorted(catalog_property_ids - linked_prop_ids):
-        results["orphan_ids"].append(
-            f"{pid} — in catalog but no constraint references it"
-        )
-
-    # ── Check 7: docs/<scope>/*.md frontmatter ↔ catalog 일치 ─
+    # ── Check 6: docs/<scope>/*.md frontmatter ↔ catalog 일치 ─
     for model in CATALOG.models:
         md_file = root / model.doc_file
         if not md_file.exists():
@@ -207,10 +177,10 @@ def check(project_root: Path | None = None) -> dict:
             )
 
         for field, catalog_val in [
-            ("constraints", model.constraints),
-            ("properties", model.properties),
-            ("events", model.events),
-            ("depends_on", model.depends_on),
+            ("constraints", tuple(c.id for c in model.constraints)),
+            ("properties", tuple(p.id for p in model.properties)),
+            ("events", tuple(e.id for e in model.events)),
+            ("depends_on", tuple(dep.id for dep in model.depends_on)),
         ]:
             doc_val = tuple(fm.get(field, []))
             if doc_val != catalog_val:
@@ -220,7 +190,7 @@ def check(project_root: Path | None = None) -> dict:
                     f"catalog={list(catalog_val)}"
                 )
 
-    # ── Check 8: glossary.md ↔ catalog glossary 일치 ─────────
+    # ── Check 7: glossary.md ↔ catalog glossary 일치 ─────────
     glossary_path = root / "docs" / "glossary.md"
     if glossary_path.exists() and hasattr(CATALOG, "glossary"):
         glossary_text = read_utf8(glossary_path)

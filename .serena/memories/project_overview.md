@@ -1,0 +1,4 @@
+- Purpose: boilerplate for lightweight DDD + property-based testing with agent-oriented workflow.
+- Stack: Python 3.12, Pydantic v2, pytest, Hypothesis, mypy, ruff.
+- Structure: docs/ narrative source of truth, src/catalog/ structural catalog, src/domain/ pure domain implementation, tests/ for PBT and TDD, .agents/skills/ for workflow helpers.
+- Current sample domain is order-oriented, but methodology intends reusable boilerplate patterns.

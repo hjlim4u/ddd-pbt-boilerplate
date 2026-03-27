@@ -1,0 +1,4 @@
+- Keep domain layer (`src/domain/`) free from external I/O/framework imports.
+- Trace rules with IDs like `E-XX`, `V-XX`, `INV-XX`, `POL-XX`, `FMT-XX`, `P-XXX`, `EV-XX`.
+- Sync docs, catalog, code, and tests when changing domain rules.
+- Use strict typing (`mypy` strict) and concise docstrings/comments tied to rule IDs where helpful.

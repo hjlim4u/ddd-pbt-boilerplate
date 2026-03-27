@@ -11,6 +11,9 @@ from dataclasses import dataclass
 class ModelField:
     """도메인 모델의 단일 필드 정의."""
 
+    id: str
+    """필드 ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
+
     name: str
     type_hint: str
     description: str = ""
@@ -20,11 +23,12 @@ class ModelField:
 class DomainModel:
     """도메인 모델 카탈로그 항목 (Entity 또는 Value Object).
 
-    Source of Truth (서사): docs/<scope>/*.md, docs/index.md. 구조: src/catalog/<scope>.py
+    Source of Truth (서사): docs/<scope>/*.md, docs/index.md.
+    구조: src/catalog/<scope>/ 패키지
     """
 
     id: str
-    """모델 ID. Entity는 E-XX, Value Object는 V-XX."""
+    """모델 ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
 
     name: str
     """Python 클래스 이름과 일치하는 모델 이름."""
@@ -41,28 +45,29 @@ class DomainModel:
     doc_file: str
     """이 모델의 개념 서사 파일 경로. 예: 'docs/order/order.md'."""
 
-    constraints: tuple[str, ...]
-    """이 모델에 적용되는 제약사항 ID 목록. 예: ('INV-02', 'POL-01')."""
+    constraints: tuple[Constraint, ...] = ()
+    """이 모델에 적용되는 제약사항 객체 목록."""
 
-    properties: tuple[str, ...]
-    """이 모델과 연결된 Property ID 목록. 예: ('P-004',)."""
+    properties: tuple[Property, ...] = ()
+    """이 모델과 연결된 Property 객체 목록."""
 
-    events: tuple[str, ...]
-    """이 모델이 발행하거나 관련된 이벤트 ID 목록. 예: ('EV-01', 'EV-02')."""
+    events: tuple[DomainEvent, ...] = ()
+    """이 모델이 발행하거나 관련된 이벤트 객체 목록."""
 
-    depends_on: tuple[str, ...]
-    """이 모델이 의존하는 다른 모델 ID 목록. 예: ('V-01', 'V-02')."""
+    depends_on: tuple[DomainModel, ...] = ()
+    """이 모델이 의존하는 다른 모델 객체 목록."""
 
 
 @dataclass(frozen=True)
 class Constraint:
     """비즈니스 제약사항 카탈로그 항목.
 
-    Source of Truth (서사): 적용 모델의 docs/<scope>/*.md. 구조: src/catalog/<scope>.py
+    Source of Truth (서사): 적용 모델의 docs/<scope>/*.md.
+    구조: src/catalog/<scope>/constraints.py
     """
 
     id: str
-    """제약사항 ID. Invariant는 INV-XX, Policy는 POL-XX, Format은 FMT-XX."""
+    """제약사항 ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
 
     category: str
     """'invariant' | 'policy' | 'format'."""
@@ -70,31 +75,23 @@ class Constraint:
     description: str
     """제약사항의 한 줄 설명."""
 
-    applies_to: tuple[str, ...]
-    """이 제약사항이 적용되는 모델 ID 목록."""
-
-    properties: tuple[str, ...]
-    """이 제약사항을 검증하는 Property ID 목록. TDD 전용 제약은 빈 튜플."""
-
 
 @dataclass(frozen=True)
 class Property:
     """Property-Based Test 카탈로그 항목.
 
-    Source of Truth (서사): 관련 모델의 docs/<scope>/*.md (Property 관점). 구조: src/catalog/<scope>.py
+    Source of Truth (서사): 관련 모델의 docs/<scope>/*.md (Property 관점).
+    구조: src/catalog/<scope>/properties.py
     """
 
     id: str
-    """Property ID. P-XXX 형식."""
+    """Property ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
 
     name: str
     """Property 이름."""
 
-    source: tuple[str, ...]
-    """이 Property가 검증하는 제약사항 ID 목록."""
-
-    models: tuple[str, ...]
-    """이 Property가 다루는 모델 ID 목록."""
+    source: tuple[Constraint, ...]
+    """이 Property가 검증하는 제약사항 객체 목록."""
 
     category: str
     """'invariant' | 'round-trip' | 'idempotence' | 'metamorphic' | 'policy'."""
@@ -113,11 +110,12 @@ class Property:
 class DomainEvent:
     """도메인 이벤트 카탈로그 항목.
 
-    Source of Truth (서사): 관련 모델의 docs/<scope>/*.md (이벤트 섹션). 구조: src/catalog/<scope>.py
+    Source of Truth (서사): 관련 모델의 docs/<scope>/*.md (이벤트 섹션).
+    구조: src/catalog/<scope>/events.py
     """
 
     id: str
-    """이벤트 ID. EV-XX 형식."""
+    """이벤트 ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
 
     name: str
     """Python 클래스 이름과 일치하는 이벤트 이름."""
@@ -133,9 +131,6 @@ class DomainEvent:
 
     subsequent: str
     """이벤트 발행 후 이어지는 처리."""
-
-    related_models: tuple[str, ...]
-    """이 이벤트와 관련된 모델 ID 목록."""
 
 
 @dataclass(frozen=True)

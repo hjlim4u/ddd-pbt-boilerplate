@@ -23,8 +23,9 @@ pytest tests/ -q
 
 # 4. 도메인 지식을 프로젝트에 맞게 교체
 #    docs/glossary.md          → 용어 교체 (서사)
-#    docs/order/*.md           → 개념별 서사 (필드·규칙·이벤트·Property 관점)
-#    src/catalog/order.py      → 카탈로그 Python 객체 교체 (구조적 관계)
+#    docs/<scope>/*.md         → 개념별 서사 작성 (필드·규칙·이벤트·Property 관점)
+#    src/catalog/<scope>.py    → 스코프 카탈로그 작성 (구조적 관계)
+#    docs/index.md             → Scope Registry와 서사 매핑 갱신
 
 # 5. Agent와 작업 시작
 #    Codex: codex (Orchestrator로 동작)
@@ -42,16 +43,14 @@ pytest tests/ -q
 ├── docs/                        # 도메인 서사 (Source of Truth — 서사)
 │   ├── index.md                 # 전체 지도 + 서사 파일 매핑
 │   ├── glossary.md              # 용어집
-│   └── order/                   # @order 개념별 서사 (모델·규칙·이벤트·Property 맥락)
-│       ├── order.md             # Order [E-01]
-│       ├── batch.md             # Batch [E-02]
-│       ├── money.md             # Money [V-01]
-│       └── orderline.md         # OrderLine [V-02]
+│   └── <scope>/                 # 현재 스코프의 개념별 서사
+│       ├── <model>.md           # 모델/규칙 서사
+│       └── ...
 │
 ├── src/
 │   ├── catalog/                 # 도메인 카탈로그 (Source of Truth — 구조)
 │   │   ├── types.py             # DomainModel, Constraint, Property, DomainEvent 타입
-│   │   ├── order.py             # @order 스코프 카탈로그 인스턴스
+│   │   ├── <scope>.py           # 스코프별 카탈로그 인스턴스
 │   │   └── __init__.py          # CATALOG 통합 객체 (impact_of 등)
 │   └── domain/                  # 도메인 구현 (순수 Python)
 │       ├── models.py            # Entity + Value Object
@@ -82,7 +81,7 @@ pytest tests/ -q
 
 | 레이어 | 위치 | 역할 | 형식 |
 |--------|------|------|------|
-| **서사** | `docs/` (개념별 `docs/order/*.md` 등) | 왜 이 개념이 존재하는가 | Markdown (사람이 읽는 문서) |
+| **서사** | `docs/` (개념별 `docs/<scope>/*.md` 등) | 왜 이 개념이 존재하는가 | Markdown (사람이 읽는 문서) |
 | **구조** | `src/catalog/` | 개념들이 어떻게 연결되는가 | Python 객체 (LSP 추적 가능) |
 | **구현** | `src/domain/` | 규칙이 어떻게 동작하는가 | Python 코드 |
 | **검증** | `tests/` | 규칙이 실제로 성립하는가 | PBT + TDD |

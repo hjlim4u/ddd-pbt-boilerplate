@@ -104,7 +104,7 @@ Subagent는 별도의 컨텍스트 윈도우에서 탐색하고,
 
 ### Claude Code 내장 subagent
 
-- **Explore**: 읽기 전용 탐색. "src/domain/에서 INV-01을 참조하는 코드를 찾아줘"
+- **Explore**: 읽기 전용 탐색. "src/domain/에서 INorder_model_money을 참조하는 코드를 찾아줘"
 - **Plan**: Plan Mode에서 자동 사용. 구현 전 코드 구조 파악
 
 ### 커스텀 subagent

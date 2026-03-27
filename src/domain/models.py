@@ -20,7 +20,7 @@ from src.domain.exceptions import (
 
 
 class Money(BaseModel):
-    """[V-01] 금액 + 통화. INV-03: amount >= 0, FMT-01: ISO 4217."""
+    """[order_model_money] 금액 + 통화. order_constraint_money_amount_non_negative: amount >= 0, order_constraint_currency_is_iso_4217_uppercase: ISO 4217."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -28,13 +28,13 @@ class Money(BaseModel):
     currency: str = Field(min_length=3, max_length=3, pattern=r"^[A-Z]{3}$")
 
     def __add__(self, other: Money) -> Money:
-        """INV-03: 덧셈 후에도 amount >= 0 보장 (두 양수의 합)."""
+        """order_constraint_money_amount_non_negative: 덧셈 후에도 amount >= 0 보장 (두 양수의 합)."""
         if self.currency != other.currency:
             raise CurrencyMismatchError(self.currency, other.currency)
         return Money(amount=self.amount + other.amount, currency=self.currency)
 
     def __sub__(self, other: Money) -> Money:
-        """INV-03: 뺄셈 결과가 음수이면 ValueError."""
+        """order_constraint_money_amount_non_negative: 뺄셈 결과가 음수이면 ValueError."""
         if self.currency != other.currency:
             raise CurrencyMismatchError(self.currency, other.currency)
         result = self.amount - other.amount
@@ -44,7 +44,7 @@ class Money(BaseModel):
 
 
 class OrderLine(BaseModel):
-    """[V-02] 주문 항목. FMT-02: SKU 형식."""
+    """[order_model_order_line] 주문 항목. order_constraint_sku_is_uppercase_alnum_hyphen_max_20: SKU 형식."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -68,7 +68,7 @@ class OrderLine(BaseModel):
 
 @dataclass
 class Order:
-    """[E-01] 주문. INV-02: 최소 1개 OrderLine 필수."""
+    """[order_model_order] 주문. INorder_model_order_line: 최소 1개 OrderLine 필수."""
 
     id: str
     customer_id: str
@@ -76,14 +76,14 @@ class Order:
     created_at: datetime = field(default_factory=datetime.now)
 
     def __post_init__(self) -> None:
-        """INV-02: Order는 최소 1개의 OrderLine을 가져야 한다."""
+        """INorder_model_order_line: Order는 최소 1개의 OrderLine을 가져야 한다."""
         if not self.order_lines:
             raise InvalidOrderError("Order must have at least one OrderLine")
 
 
 @dataclass(eq=False)
 class Batch:
-    """[E-02] 입고 배치. INV-01: 가용 수량 비음수."""
+    """[order_model_batch] 입고 배치. INorder_model_money: 가용 수량 비음수."""
 
     reference: str
     sku: str
@@ -101,17 +101,17 @@ class Batch:
 
     @property
     def available_quantity(self) -> int:
-        """INV-01: 항상 >= 0."""
+        """INorder_model_money: 항상 >= 0."""
         return self.purchased_quantity - sum(
             line.quantity for line in self._allocations
         )
 
     def can_allocate(self, line: OrderLine) -> bool:
-        """POL-02: SKU 일치 + 수량 충분."""
+        """order_constraint_allocation_requires_matching_sku: SKU 일치 + 수량 충분."""
         return self.sku == line.sku and self.available_quantity >= line.quantity
 
     def allocate(self, line: OrderLine) -> None:
-        """INV-01: 가용 수량 비음수 보장. INV-04: 멱등성."""
+        """INorder_model_money: 가용 수량 비음수 보장. order_constraint_batch_allocation_idempotent: 멱등성."""
         if not self.can_allocate(line):
             raise CannotAllocateError(
                 line.sku,

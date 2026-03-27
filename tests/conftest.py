@@ -44,7 +44,7 @@ CURRENCIES = ["USD", "EUR", "GBP", "KRW", "JPY"]
 
 @st.composite
 def valid_money(draw: st.DrawFn) -> Money:
-    """V-01 Money 기반. INV-03 + FMT-01 충족."""
+    """order_model_money Money 기반. order_constraint_money_amount_non_negative + order_constraint_currency_is_iso_4217_uppercase 충족."""
     amount = draw(
         st.decimals(
             min_value=Decimal("0"),
@@ -60,7 +60,7 @@ def valid_money(draw: st.DrawFn) -> Money:
 
 @st.composite
 def valid_order_line(draw: st.DrawFn, sku: str | None = None) -> OrderLine:
-    """V-02 OrderLine 기반. FMT-02 충족."""
+    """order_model_order_line OrderLine 기반. order_constraint_sku_is_uppercase_alnum_hyphen_max_20 충족."""
     _sku = sku or draw(
         st.from_regex(r"[A-Z0-9\-]{3,20}", fullmatch=True)
     )

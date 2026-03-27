@@ -5,7 +5,7 @@
 ## 프로젝트 구조
 
 ```
-docs/              도메인 서사 (index.md, glossary.md, docs/order/*.md)
+docs/              도메인 서사 (index.md, glossary.md, docs/<scope>/*.md)
 src/catalog/       도메인 카탈로그 — 구조적 관계의 정본 (Python 객체)
 src/domain/        도메인 구현 (외부 의존성 없는 순수 Python)
 tests/properties/  PBT (Hypothesis)
@@ -17,7 +17,7 @@ tests/unit/        예제 기반 TDD (pytest)
 작업 전에 `docs/index.md`를 먼저 읽어 전체 지도를 파악해라.
 
 구조적 관계가 필요할 때 (어떤 모델에 어떤 제약사항이 적용되는지 등):
-→ `src/catalog/order.py`를 읽어라. 모든 ID 간 연결이 Python 객체로 정의되어 있다.
+→ `docs/index.md`의 Scope Registry에서 대상 스코프를 찾고, 대응하는 `src/catalog/<scope>.py`를 읽어라. 모든 ID 간 연결이 Python 객체로 정의되어 있다.
 
 서사적 배경이 필요할 때 (왜 이 규칙이 존재하는지, 용어의 의미 등):
 → `docs/` 파일들을 읽어라.

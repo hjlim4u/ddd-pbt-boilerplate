@@ -20,7 +20,7 @@ tests/            PBT(properties/)와 TDD(unit/).
 ## 컨텍스트를 파악하는 방법
 
 1. 작업 전에 `docs/index.md`를 읽어 전체 지도를 파악한다.
-2. 구조적 관계(refs, 제약사항, property 연결)가 필요하면 `src/catalog/order.py`를 읽는다.
+2. 구조적 관계(refs, 제약사항, property 연결)가 필요하면 `docs/index.md`의 Scope Registry에서 현재 스코프를 찾고, 해당 `src/catalog/<scope>.py`를 읽는다.
 3. 특정 ID의 파급 범위가 필요하면 impact-tracer skill을 써라 (`CATALOG.impact_of(id)`).
 4. 전체 정합성을 확인하려면 integrity-checker skill을 써라.
 5. 깊은 코드 탐색이 필요하면 subagent를 생성하여 위임해라.
@@ -59,20 +59,20 @@ tests/            PBT(properties/)와 TDD(unit/).
 ## 판단 예시
 
 ### 예시 A: 기존 VO에 연산 추가 ("Money에 뺄셈 추가")
-판단: 새 모델/이벤트 불필요. 기존 INV-03 범위 내.
+판단: 새 모델/이벤트 불필요. 기존 order_constraint_money_amount_non_negative 범위 내.
 실행: 바로 테스트(PBT+TDD 병렬) → 구현 → 리뷰 → 커밋. docs/catalog 변경 없음.
 
 ### 예시 B: 기존 Entity에 필드 추가 ("Order에 배송 주소 추가")
-판단: 해당 개념의 `docs/order/*.md` 서사 + catalog DomainModel 업데이트 필요. 새 제약사항 가능성 → 사용자 확인.
+판단: 해당 개념의 `docs/<scope>/*.md` 서사 + 대응하는 catalog DomainModel 업데이트 필요. 새 제약사항 가능성 → 사용자 확인.
 실행: docs 서사 + catalog 동시 업데이트 → 필요시 property 추출 → 테스트 → 구현 → 커밋.
 
 ### 예시 C: 새 도메인 개념 추가 ("환불 기능 추가")
 판단: 새 모델+이벤트+제약사항 모두 필요. 영향 범위 넓음.
 실행: Claude Code로 도메인 모델링 → docs 서사 + catalog 동시 작성 → property 추출 → 테스트 병렬 → 구현 → Gemini 감사 → 커밋.
 
-### 예시 D: 기존 제약사항 수정 ("INV-01 규칙 변경")
+### 예시 D: 기존 제약사항 수정 ("INorder_model_money 규칙 변경")
 판단: 파급 범위 넓음. impact-tracer로 영향 추적 필수.
-실행: CATALOG.impact_of("INV-01") → docs 서사 + catalog 수정 → property 재검토 → 테스트 수정 → 구현 수정 → 감사 → 커밋.
+실행: CATALOG.impact_of("INorder_model_money") → docs 서사 + catalog 수정 → property 재검토 → 테스트 수정 → 구현 수정 → 감사 → 커밋.
 
 ## 결과 검증
 

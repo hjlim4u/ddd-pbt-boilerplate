@@ -4,7 +4,7 @@
 
 ## 프로젝트 구조
 
-docs/           도메인 서사 (index.md, glossary.md, docs/order/*.md)
+docs/           도메인 서사 (index.md, glossary.md, docs/<scope>/*.md)
 src/catalog/    구조적 관계 정본 (Python)
 src/domain/     도메인 구현
 tests/          PBT(properties/)와 TDD(unit/)

@@ -10,9 +10,11 @@ description: >
 
 1. **카탈로그 내부 정합성**: catalog 내 ID 교차 참조가 모두 유효한가?
    - DomainModel.constraints → Constraint 존재 여부
-   - Constraint.applies_to → DomainModel 존재 여부
+   - DomainModel.properties → Property 존재 여부
+   - DomainModel.events → DomainEvent 존재 여부
+   - DomainModel.depends_on → DomainModel 존재 여부
    - Property.source → Constraint 존재 여부
-   - Constraint ↔ Property 양방향 일관성 등
+   - Property.source로부터 모델 역추적이 가능한지
 
 2. **문서 경로 메타데이터 정합성**: `DomainModel.doc_file`이 실제로 존재하는가?
 
@@ -44,7 +46,7 @@ Gemini CLI의 1M 컨텍스트가 이 작업에 적합하다.
 ```json
 {
   "status": "PASS | ISSUES_FOUND | ERROR",
-  "catalog_errors": ["E-01.constraints → INV-99 not defined in catalog"],
+  "catalog_errors": ["order_model_order.constraints → INV-99 not defined in catalog"],
   "missing_tests": ["INV-XX — no test references this ID"],
   "orphan_ids": ["P-XXX — no constraint references it"],
   "unconstrained_code": ["INV-99 — in code but not in catalog"]

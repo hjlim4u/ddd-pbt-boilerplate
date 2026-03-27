@@ -7,7 +7,7 @@ description: >
 
 ## 절차
 
-1. 대상 제약사항 ID를 `from src.catalog import CATALOG`로 찾아 `Constraint` 객체와 `applies_to` 모델을 확인한다.
+1. 대상 제약사항 ID를 `from src.catalog import CATALOG`로 찾아 `Constraint` 객체와 `CATALOG.models_for_constraint(id)` 결과를 확인한다.
 2. 각 적용 모델의 서사를 `CATALOG.doc_files_for_constraint(id)`와 `docs/index.md` Scope Registry를 기준으로 읽는다.
 3. 기존 Property는 카탈로그의 `PROPERTIES` 또는 `CATALOG.properties`에서 확인한다.
 4. 구현 코드(`src/domain/`)는 읽지 않는다.
@@ -24,8 +24,7 @@ description: >
    Property(
        id="P-XXX",           # 기존 최대 번호 + 1
        name="...",
-       source=("INV-XX",),   # 제약사항 ID
-       models=("E-XX",),     # 적용 모델 ID
+       source=(INV_XX,),     # 제약사항 심볼
        category="invariant", # invariant / round-trip / idempotence / metamorphic / policy
        description="...",
        test_mode="PBT",      # PBT / TDD / Mixed

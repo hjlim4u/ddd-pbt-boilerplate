@@ -17,7 +17,7 @@ Anti-Corruption Layer, Context Map 등 풍부한 전략적·전술적 패턴을 
 |------|------|------|
 | 용어집 | AI가 용어를 혼동하지 않도록 고정 | glossary.md |
 | 개념별 서사 | 필드·규칙·이벤트·Property 맥락을 한곳에 서술 | docs/<scope>/*.md (예: docs/order/order.md) |
-| 구조적 관계 | ID 교차 참조의 정본 | src/catalog/<scope>.py + src/catalog/__init__.py |
+| 구조적 관계 | 모델 중심 심볼 참조의 정본 | src/catalog/<scope>/ + src/catalog/__init__.py |
 
 이 조합이 AI agent에게 "도메인을 이해할 수 있는 최소한의 구조"를 제공한다.
 
@@ -38,21 +38,22 @@ Anti-Corruption Layer, Context Map 등 풍부한 전략적·전술적 패턴을 
 
 ```
 ID 체계:
-  E-XX    Entity (E-01 Order, E-02 Batch)
-  V-XX    Value Object (V-01 Money, V-02 OrderLine)
-  EV-XX   도메인 이벤트 (EV-01 OrderCreated)
-  INV-XX  불변식 (INV-01 가용 수량 비음수)
-  POL-XX  정책 (POL-01 ETA 우선 배정)
-  FMT-XX  형식 (FMT-01 ISO 4217)
-  P-XXX   Property (P-001 Money round-trip)
+  E-XX    Entity (order_model_order Order, order_model_batch Batch)
+  V-XX    Value Object (order_model_money Money, order_model_order_line OrderLine)
+  EV-XX   도메인 이벤트 (Eorder_model_money OrderCreated)
+  INV-XX  불변식 (INorder_model_money 가용 수량 비음수)
+  POL-XX  정책 (order_constraint_order_creation_publishes_order_created ETA 우선 배정)
+  FMT-XX  형식 (order_constraint_currency_is_iso_4217_uppercase ISO 4217)
+  P-XXX   Property (order_property_money_serialization_round_trip Money round-trip)
   @name   영역 태그 (@order, @inventory)
 ```
 
-교차 참조는 **카탈로그**(`src/catalog/<scope>.py`, `src/catalog/__init__.py`)의 `DomainModel`, `Constraint`, `Property` 객체 필드로 기록한다.
+교차 참조는 **카탈로그**(`src/catalog/<scope>/`, `src/catalog/__init__.py`)의 모델 중심 심볼 참조로 기록한다.
+기본 방향은 `Model -> Constraint/Property/Event`, `Property -> Constraint`, `Model -> depends_on Model`이다.
 서사는 **개념별** `docs/<scope>/*.md`에 유지한다.
 
 이 구조의 효과:
-- **agent가 영향 범위를 즉시 파악**: `CATALOG.impact_of("E-02")` 등으로 연결된 ID를 조회
+- **agent가 영향 범위를 즉시 파악**: `CATALOG.impact_of("order_model_batch")` 등으로 연결된 ID를 조회
 - **integrity-checker가 자동 검증**: 카탈로그 내부 참조와 코드·테스트 ID를 스크립트가 탐지
 - **서사는 한 개념 파일로 읽기 쉬움**: `doc_file` 한 경로로 개념 맥락 파악
 
@@ -65,11 +66,11 @@ Pydantic의 Field 제약이 곧 카탈로그의 해당 제약사항(INV/FMT)과 
 
 ```python
 class Money(BaseModel):
-    """[V-01] INV-03: amount >= 0, FMT-01: ISO 4217."""
+    """[order_model_money] order_constraint_money_amount_non_negative: amount >= 0, order_constraint_currency_is_iso_4217_uppercase: ISO 4217."""
     model_config = ConfigDict(frozen=True)
-    amount: Decimal = Field(ge=0, decimal_places=2)      # ← INV-03
+    amount: Decimal = Field(ge=0, decimal_places=2)      # ← order_constraint_money_amount_non_negative
     currency: str = Field(min_length=3, max_length=3,
-                          pattern=r"^[A-Z]{3}$")          # ← FMT-01
+                          pattern=r"^[A-Z]{3}$")          # ← order_constraint_currency_is_iso_4217_uppercase
 ```
 
 ### Entity — Python dataclass
@@ -80,13 +81,13 @@ class Money(BaseModel):
 ```python
 @dataclass
 class Order:
-    """[E-01] INV-02: 최소 1개 OrderLine 필수."""
+    """[order_model_order] INorder_model_order_line: 최소 1개 OrderLine 필수."""
     id: str
     customer_id: str
     order_lines: list[OrderLine]
 
     def __post_init__(self):
-        if not self.order_lines:  # ← INV-02
+        if not self.order_lines:  # ← INorder_model_order_line
             raise InvalidOrderError("Order must have at least one OrderLine")
 ```
 
@@ -103,6 +104,6 @@ class Order:
 
 1. **모델 15개 이하**: 현재 평탄한 구조 유지. ID + refs만 추가.
 2. **모델 15~40개**: index.md + 영역별 파일 분리 (models/order.md, models/inventory.md).
-3. **모델 40개 이상**: 모델 카드 (cards/E-01-order.md). 모델 하나당 파일 하나.
+3. **모델 40개 이상**: 모델 카드 (cards/order_model_order-order.md). 모델 하나당 파일 하나.
 
 전환은 점진적으로 한다. 한 번에 재구성하지 않고, 가장 복잡한 영역부터 분리한다.

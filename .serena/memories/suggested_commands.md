@@ -1,0 +1,5 @@
+- `pytest tests/ -q` run test suite.
+- `mypy src/` run type checks.
+- `ruff check .` run lint checks.
+- `python .agents/skills/integrity-checker/scripts/check_sync.py` verify docs/catalog/code/test sync.
+- Windows shell utilities commonly used here: `Get-ChildItem`, `Get-Content`, `Select-String`, `rg`.

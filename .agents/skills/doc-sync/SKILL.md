@@ -21,8 +21,8 @@ description: >
   - 본문: 필드, ID별 규칙 앵커, 이벤트, Property 관점
 - `docs/glossary.md`
   - 새 용어 추가
-- `src/catalog/<scope>.py`
-  - `DomainModel(...)` 추가: `doc_file`, `constraints`, `properties`, `events`, `depends_on` 모두 명시
+- `src/catalog/<scope>/models.py`
+  - `DomainModel(...)` 추가: `doc_file`, `constraints`, `properties`, `events`, `depends_on`를 명시
 - `docs/index.md`
   - Scope Registry, 모델 요약, 서사 파일 요약 갱신
 
@@ -32,9 +32,10 @@ description: >
 
 - 관련 `doc_file`
   - 불변 조건 / 비즈니스 규칙 / 형식 제약 섹션에 서사 추가
-- `src/catalog/<scope>.py`
+- `src/catalog/<scope>/constraints.py`
   - `Constraint(...)` 추가
-  - 적용 모델의 `DomainModel.constraints`에 ID 추가
+- `src/catalog/<scope>/models.py`
+  - 적용 모델의 `constraints`에 제약 심볼을 연결
 
 ---
 
@@ -42,9 +43,11 @@ description: >
 
 - 관련 `doc_file`
   - Property-Based 검증 관점 섹션에 서사 추가
-- `src/catalog/<scope>.py`
+- `src/catalog/<scope>/properties.py`
   - `Property(...)` 추가
-  - 연결된 `Constraint.properties` 및 `DomainModel.properties` 갱신
+  - `source`에 연결된 `Constraint` 심볼을 연결
+- `src/catalog/<scope>/models.py`
+  - 관련 모델의 `properties`에 Property 심볼을 연결
 
 ---
 
@@ -52,6 +55,7 @@ description: >
 
 - 관련 `doc_file`
   - 도메인 이벤트 섹션에 서사 추가
-- `src/catalog/<scope>.py`
+- `src/catalog/<scope>/events.py`
   - `DomainEvent(...)` 추가
-  - 관련 모델의 `events` 갱신
+- `src/catalog/<scope>/models.py`
+  - 관련 모델의 `events`에 이벤트 심볼을 연결

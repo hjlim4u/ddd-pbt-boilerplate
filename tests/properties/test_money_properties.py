@@ -1,4 +1,4 @@
-"""Money Property-Based Tests. P-001 (round-trip), P-002 (commutativity)."""
+"""Money Property-Based Tests. order_property_money_serialization_round_trip (round-trip), order_property_money_addition_is_commutative (commutativity)."""
 
 from decimal import Decimal
 
@@ -10,7 +10,7 @@ from src.domain.models import Money
 from tests.conftest import valid_money
 
 # ──────────────────────────────────────────────
-# P-001: Money 직렬화 왕복 (INV-03, FMT-01)
+# order_property_money_serialization_round_trip: Money 직렬화 왕복 (order_constraint_money_amount_non_negative, order_constraint_currency_is_iso_4217_uppercase)
 # ──────────────────────────────────────────────
 
 
@@ -31,7 +31,7 @@ def test_money_json_roundtrip(money: Money) -> None:
 
 
 # ──────────────────────────────────────────────
-# P-002: Money 덧셈 교환법칙 (INV-03)
+# order_property_money_addition_is_commutative: Money 덧셈 교환법칙 (order_constraint_money_amount_non_negative)
 # ──────────────────────────────────────────────
 
 
@@ -44,7 +44,7 @@ def test_money_addition_is_commutative(m1: Money, m2: Money) -> None:
 
 @given(m1=valid_money(), m2=valid_money())
 def test_money_addition_preserves_non_negative(m1: Money, m2: Money) -> None:
-    """INV-03: 덧셈 결과도 0 이상이다."""
+    """order_constraint_money_amount_non_negative: 덧셈 결과도 0 이상이다."""
     assume(m1.currency == m2.currency)
     result = m1 + m2
     assert result.amount >= 0

@@ -14,6 +14,7 @@ Usage:
 
 from dataclasses import dataclass
 
+from src.catalog import order as _order
 from src.catalog.types import (
     Constraint,
     DomainEvent,
@@ -22,7 +23,6 @@ from src.catalog.types import (
     ModelField,
     Property,
 )
-from src.catalog import order as _order
 
 
 @dataclass(frozen=True)
@@ -61,15 +61,30 @@ class DomainCatalog:
 
     def models_for_constraint(self, constraint_id: str) -> tuple[DomainModel, ...]:
         """특정 제약사항이 적용되는 모델 목록을 반환한다."""
-        return tuple(m for m in self.models if constraint_id in m.constraints)
+        constraint = self.get_constraint(constraint_id)
+        return tuple(model for model in self.models if constraint in model.constraints)
 
     def constraints_for_model(self, model_id: str) -> tuple[Constraint, ...]:
         """특정 모델에 적용되는 제약사항 목록을 반환한다."""
-        return tuple(c for c in self.constraints if model_id in c.applies_to)
+        return self.get_model(model_id).constraints
+
+    def properties_for_constraint(self, constraint_id: str) -> tuple[Property, ...]:
+        """특정 제약사항을 검증하는 Property 목록을 반환한다."""
+        constraint = self.get_constraint(constraint_id)
+        return tuple(p for p in self.properties if constraint in p.source)
 
     def properties_for_model(self, model_id: str) -> tuple[Property, ...]:
         """특정 모델과 연결된 Property 목록을 반환한다."""
-        return tuple(p for p in self.properties if model_id in p.models)
+        return self.get_model(model_id).properties
+
+    def models_for_property(self, property_id: str) -> tuple[DomainModel, ...]:
+        """특정 Property가 검증하는 모델 목록을 반환한다."""
+        prop = self.get_property(property_id)
+        return tuple(model for model in self.models if prop in model.properties)
+
+    def events_for_model(self, model_id: str) -> tuple[DomainEvent, ...]:
+        """특정 모델과 관련된 이벤트 목록을 반환한다."""
+        return self.get_model(model_id).events
 
     def doc_file_for_model(self, model_id: str) -> str:
         """특정 모델의 개념 서사 파일 경로를 반환한다."""
@@ -78,19 +93,13 @@ class DomainCatalog:
     def doc_files_for_constraint(self, constraint_id: str) -> tuple[str, ...]:
         """특정 제약사항과 연결된 개념 서사 파일 목록을 반환한다."""
         return tuple(
-            dict.fromkeys(
-                self.get_model(model_id).doc_file
-                for model_id in self.get_constraint(constraint_id).applies_to
-            )
+            dict.fromkeys(model.doc_file for model in self.models_for_constraint(constraint_id))
         )
 
     def doc_files_for_property(self, property_id: str) -> tuple[str, ...]:
         """특정 Property와 연결된 개념 서사 파일 목록을 반환한다."""
         return tuple(
-            dict.fromkeys(
-                self.get_model(model_id).doc_file
-                for model_id in self.get_property(property_id).models
-            )
+            dict.fromkeys(model.doc_file for model in self.models_for_property(property_id))
         )
 
     def impact_of(self, target_id: str) -> dict[str, tuple[str, ...]]:
@@ -100,22 +109,24 @@ class DomainCatalog:
         """
         affected_models = tuple(
             m.id for m in self.models
-            if target_id in m.constraints
-            or target_id in m.properties
-            or target_id in m.events
-            or target_id in m.depends_on
+            if any(constraint.id == target_id for constraint in self.constraints_for_model(m.id))
+            or any(prop.id == target_id for prop in self.properties_for_model(m.id))
+            or any(event.id == target_id for event in self.events_for_model(m.id))
+            or any(dependency.id == target_id for dependency in m.depends_on)
         )
         affected_constraints = tuple(
             c.id for c in self.constraints
-            if target_id in c.applies_to or target_id in c.properties
+            if any(model.id == target_id for model in self.models_for_constraint(c.id))
+            or any(prop.id == target_id for prop in self.properties_for_constraint(c.id))
         )
         affected_properties = tuple(
             p.id for p in self.properties
-            if target_id in p.source or target_id in p.models
+            if any(constraint.id == target_id for constraint in p.source)
+            or any(model.id == target_id for model in self.models_for_property(p.id))
         )
         affected_events = tuple(
             e.id for e in self.events
-            if target_id in e.related_models
+            if any(model.id == target_id for model in self.models if e in model.events)
         )
         return {
             "models": affected_models,

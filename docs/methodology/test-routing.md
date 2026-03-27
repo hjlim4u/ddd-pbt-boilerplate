@@ -35,7 +35,7 @@ currency는 5개 이상의 유효 값이 있으므로 조합이 수만 가지다
 사람이 10개의 예제를 쓰는 것보다 Hypothesis가 50개를 생성하는 게 낫다.
 
 ```
-INV-03 (Money.amount >= 0):
+order_constraint_money_amount_non_negative (Money.amount >= 0):
   Q1=Y (모든 Money에 대해 성립)
   Q2=Y (Decimal × Currency 조합)
   Q3=Y (경계값 0.00, -0.01이 반례로 유의미)
@@ -53,7 +53,7 @@ INV-03 (Money.amount >= 0):
 핵심 불변식은 PBT(stateful)로, 구체적 시나리오는 TDD로 테스트한다.
 
 Batch의 allocate/deallocate는 어떤 명령 시퀀스 이후에도
-available_quantity >= 0이어야 한다 (INV-01). 이것은 Hypothesis의
+available_quantity >= 0이어야 한다 (INorder_model_money). 이것은 Hypothesis의
 RuleBasedStateMachine으로 테스트한다.
 
 ```python
@@ -73,14 +73,14 @@ TDD로 고정한다. 이런 시나리오는 PBT가 우연히 생성하기 어렵
 ### 도메인 정책 → 일반화 가능하면 PBT, 예외 많으면 TDD
 
 ```
-POL-02 (SKU 일치 검증):
+order_constraint_allocation_requires_matching_sku (SKU 일치 검증):
   Q1=Y ("모든 배정에서 SKU가 일치해야 한다")
   Q2=Y (SKU 문자열 조합이 넓음)
   Q3=Y (불일치 SKU가 반례로 유의미)
   Q4=Y (sku_batch != sku_line이면 실패)
   → PBT
 
-POL-03 (주문 취소 시 배정 해제):
+order_constraint_order_cancellation_releases_allocations (주문 취소 시 배정 해제):
   Q1=Y ("모든 취소에서 배정이 해제되어야 한다")
   Q2=N (취소 시나리오 자체는 제한적)
   Q3=N (shrink보다 구체 시나리오가 더 유의미)
