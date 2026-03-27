@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(codeagent-wrapper --backend:*)",
+      "Bash(python .agents/skills/integrity-checker/scripts/check_sync.py)",
+      "Bash(python -m pytest tests/ --tb=short -q)",
+      "Bash(python -m mypy src/)"
+    ]
+  }
+}

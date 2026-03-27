@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "command": "cd $PROJECT_DIR && python -m pytest tests/ --tb=line -q 2>&1 | tail -5"
+      }
+    ],
+    "Stop": [
+      {
+        "command": "cd $PROJECT_DIR && python .agents/skills/integrity-checker/scripts/check_sync.py 2>&1 | tail -20"
+      }
+    ]
+  }
+}
