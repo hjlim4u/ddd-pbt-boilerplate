@@ -1,4 +1,12 @@
-<!-- catalog-anchor: order_model_order -->
+---
+model_id: ORD_E_ORDER
+scope: @order
+constraints: [ORD_INV_ORDER_REQUIRES_ORDER_LINE, ORD_POL_ORDER_CREATE_EMITS_ORDER_CREATED, ORD_POL_ORDER_CANCEL_RELEASES_ALLOC]
+properties: [ORD_P_ORDER_REQUIRES_ORDER_LINE]
+events: [ORD_EV_ORDER_CREATED, ORD_EV_ORDER_CANCELLED]
+depends_on: [ORD_V_MONEY, ORD_V_ORDER_LINE]
+---
+<!-- catalog-anchor: ORD_E_ORDER -->
 # Order
 
 고객이 결제를 완료한 구매 건을 나타내는 집합체(Aggregate Root)이다.
@@ -8,24 +16,24 @@
 
 ## 필드
 
-<!-- catalog-anchor: order_model_order_field_id -->
+<!-- catalog-anchor: ORD_F_ORDER_ID -->
 - id: str - UUID
 
-<!-- catalog-anchor: order_model_order_field_customer_id -->
+<!-- catalog-anchor: ORD_F_ORDER_CUSTOMER_ID -->
 - customer_id: str - 주문자 식별자
 
-<!-- catalog-anchor: order_model_order_field_order_lines -->
+<!-- catalog-anchor: ORD_F_ORDER_ORDER_LINES -->
 - order_lines: list[OrderLine] - 최소 1개의 항목을 가져야 한다
 
-<!-- catalog-anchor: order_model_order_field_created_at -->
+<!-- catalog-anchor: ORD_F_ORDER_CREATED_AT -->
 - created_at: datetime - 생성 시각
 
-<!-- catalog-anchor: order_model_order_field_pending_events -->
+<!-- catalog-anchor: ORD_F_ORDER_PENDING_EVENTS -->
 - pending_events: list[OrderCreated | OrderCancelled] - 아직 발행되지 않은 도메인 이벤트
 
 ## 불변 조건
 
-<!-- catalog-anchor: order_constraint_order_requires_at_least_one_order_line -->
+<!-- catalog-anchor: ORD_INV_ORDER_REQUIRES_ORDER_LINE -->
 ### 최소 한 개의 주문 항목이 필요하다
 
 유효한 Order는 항상 하나 이상의 OrderLine을 포함해야 한다.
@@ -33,12 +41,12 @@
 
 ## 비즈니스 규칙
 
-<!-- catalog-anchor: order_constraint_order_creation_publishes_order_created -->
+<!-- catalog-anchor: ORD_POL_ORDER_CREATE_EMITS_ORDER_CREATED -->
 ### 주문 생성은 OrderCreated 이벤트를 발행한다
 
 주문이 성립하면 OrderCreated 이벤트가 발행되어 재고 배정 프로세스를 시작하는 신호가 된다.
 
-<!-- catalog-anchor: order_constraint_order_cancellation_releases_allocations -->
+<!-- catalog-anchor: ORD_POL_ORDER_CANCEL_RELEASES_ALLOC -->
 ### 주문 취소는 모든 배정을 해제한다
 
 주문이 취소되면 해당 주문에 묶인 모든 재고 배정이 해제되어야 한다.
@@ -46,7 +54,7 @@
 
 ## 도메인 이벤트
 
-<!-- catalog-anchor: order_event_order_created -->
+<!-- catalog-anchor: ORD_EV_ORDER_CREATED -->
 ### OrderCreated
 
 주문이 생성되었음을 나타낸다.
@@ -56,7 +64,7 @@
 - 트리거: 고객이 결제 완료 시
 - 후속: 재고 배정 시작
 
-<!-- catalog-anchor: order_event_order_cancelled -->
+<!-- catalog-anchor: ORD_EV_ORDER_CANCELLED -->
 ### OrderCancelled
 
 주문이 취소되었음을 나타낸다.
@@ -68,7 +76,7 @@
 
 ## Property-Based 검증 관점
 
-<!-- catalog-anchor: order_property_order_requires_at_least_one_order_line -->
+<!-- catalog-anchor: ORD_P_ORDER_REQUIRES_ORDER_LINE -->
 ### 최소 주문 항목 보장
 
 유효한 Order는 항상 `len(order_lines) >= 1`이다.

@@ -51,7 +51,7 @@
 | 종류 | 경로 | 설명 |
 |------|------|------|
 | 용어집 | [glossary.md](glossary.md) | 도메인 용어 정의 |
-| 카탈로그 엔트리포인트 | `src/catalog/__init__.py` | `CATALOG` 조회 API |
+| 카탈로그 엔트리포인트 | `src/catalog/__init__.py` | `CATALOG` 메타데이터 + 영향 분석 API |
 | 스코프 카탈로그 | `src/catalog/<scope>/` | 해당 스코프의 구조화된 도메인 지식 |
 | 구현 | `src/domain/` | 도메인 구현 |
 | PBT | `tests/properties/` | Property-Based Tests |

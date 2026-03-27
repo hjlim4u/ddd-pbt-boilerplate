@@ -7,7 +7,7 @@ from src.domain.models import Batch, OrderLine
 
 
 def allocate(line: OrderLine, batches: list[Batch]) -> str:
-    """order_constraint_allocation_requires_matching_sku: SKU 일치하는 Batch 중 ETA 빠른 순으로 배정. INorder_model_money 보장.
+    """ORD_POL_ALLOC_REQUIRES_MATCHING_SKU: SKU 일치하는 Batch 중 ETA 빠른 순으로 배정. ORD_INV_BATCH_AVAILABLE_QUANTITY_NONNEG 보장.
 
     In-stock(eta=None)이 shipment보다 우선한다.
     """
@@ -23,7 +23,7 @@ def allocate(line: OrderLine, batches: list[Batch]) -> str:
 
 
 def cancel_order(order_id: str, batches: list[Batch]) -> list[OrderLine]:
-    """order_constraint_order_cancellation_releases_allocations: 주문 취소 시 모든 배정 해제."""
+    """ORD_POL_ORDER_CANCEL_RELEASES_ALLOC: 주문 취소 시 모든 배정 해제."""
     deallocated: list[OrderLine] = []
     for batch in batches:
         to_remove = {

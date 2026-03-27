@@ -36,7 +36,7 @@ Codex의 `spawn_agent` / `wait_agent`를 사용한다.
 
 ```
 "domain-explorer subagent에게 위임해서
- order_constraint_order_cancellation_releases_allocations과 관련된 모든 파일을 찾아줘."
+ ORD_POL_ORDER_CANCEL_RELEASES_ALLOC과 관련된 모든 파일을 찾아줘."
 ```
 
 이 boilerplate에 포함된 Claude Code Subagent:
@@ -79,17 +79,18 @@ codex exec --sandbox read-only --ephemeral "프롬프트"   # 읽기 전용
 
 ### 패턴 A: Orchestrator → Claude Code (도메인 추론)
 
-Claude Code에게 보낼 때는 **grep으로 관련 부분만 발췌**하여 전달한다.
+Claude Code에게 보낼 때는 카탈로그/LSP 심볼 탐색으로 관련 경로를 먼저 좁히고,
+그 뒤 markdown 서사에서 **필요한 부분만 발췌**하여 전달한다.
 토큰 비용이 높으므로 정밀 발췌가 중요하다.
 
 ```bash
-# 1. 관련 부분만 발췌
+# 1. 관련 문서 경로를 좁힌 뒤 필요한 부분만 발췌
 mkdir -p .task
-grep -E "order_constraint_order_cancellation_releases_allocations|주문 취소" docs/order/batch.md docs/order/order.md > .task/context.md
+grep -E "ORD_POL_ORDER_CANCEL_RELEASES_ALLOC|주문 취소" docs/order/batch.md docs/order/order.md > .task/context.md
 
 # 2. 프롬프트 작성
 cat > .task/prompt.md << 'EOF'
-.task/context.md를 읽고 order_constraint_order_cancellation_releases_allocations에 대한
+.task/context.md를 읽고 ORD_POL_ORDER_CANCEL_RELEASES_ALLOC에 대한
 Hypothesis stateful PBT를 작성해줘.
 출력: tests/properties/test_order_cancel.py
 구현 코드는 작성하지 마.
@@ -100,7 +101,8 @@ claude -p "$(cat .task/prompt.md)" --allowedTools "Read,Write"
 ```
 
 컨텍스트 제어 포인트:
-- grep으로 관련 부분만 .task/context.md에 발췌 → **컨텍스트 낭비 없음**
+- 카탈로그/LSP로 파일 경로를 먼저 좁힘 → **불필요한 파일 로드 없음**
+- 텍스트 발췌로 관련 부분만 .task/context.md에 남김 → **컨텍스트 낭비 없음**
 - 제약사항 ID를 명시 → **컨텍스트 유실 없음**
 
 ### 패턴 B: Orchestrator → Gemini CLI (검증)
@@ -141,7 +143,7 @@ claude -p "tests/의 실패하는 테스트를 읽고,
 
 | 상대 | 전달 방식 | 이유 |
 |------|----------|------|
-| Claude Code | grep으로 발췌 → .task/context.md | 토큰 비용 높으므로 정밀 발췌 |
+| Claude Code | catalog/LSP로 경로 확정 → 필요한 markdown만 발췌 | 토큰 비용 높으므로 정밀 발췌 |
 | Gemini CLI | 파일 경로만 전달 | 1M 컨텍스트이므로 직접 읽는 게 효율적 |
 | Codex Worker | 네이티브 subagent 프롬프트 | 같은 모델이므로 파일 접근 공유 |
 
@@ -150,7 +152,7 @@ claude -p "tests/의 실패하는 테스트를 읽고,
 ```
 나쁜 예: "코드를 리뷰해줘"
 좋은 예: "src/domain/services.py의 cancel_order()를 리뷰해줘.
-         관련 제약사항은 order_constraint_order_cancellation_releases_allocations."
+         관련 제약사항은 ORD_POL_ORDER_CANCEL_RELEASES_ALLOC."
 ```
 
 ### 규칙 3: sub-agent에게 다른 sub-agent의 존재를 알리지 않는다
@@ -178,14 +180,15 @@ rm -rf .task/*
 
 [Codex Orchestrator]
 
-1. docs/index.md 읽기 → order_constraint_order_cancellation_releases_allocations 존재, 테스트/구현 없음
+1. docs/index.md 읽기 → ORD_POL_ORDER_CANCEL_RELEASES_ALLOC 존재, 테스트/구현 없음
 
 2. Claude Code에게 PBT 위임:
-   grep -E "order_constraint_order_cancellation_releases_allocations|취소" docs/order/order.md docs/order/batch.md > .task/context.md
+   catalog/LSP로 docs/order/order.md, docs/order/batch.md를 먼저 확정
+   grep -E "ORD_POL_ORDER_CANCEL_RELEASES_ALLOC|취소" docs/order/order.md docs/order/batch.md > .task/context.md
    claude -p "$(cat .task/prompt.md)" --allowedTools "Read,Write"
 
 3. Codex Worker에게 TDD 위임 (2와 병렬):
-   "tdd-writer subagent를 생성하여 order_constraint_order_cancellation_releases_allocations 엣지 케이스 테스트 작성"
+   "tdd-writer subagent를 생성하여 ORD_POL_ORDER_CANCEL_RELEASES_ALLOC 엣지 케이스 테스트 작성"
 
 4. 두 작업 완료 → pytest --collect-only로 수집 확인
 

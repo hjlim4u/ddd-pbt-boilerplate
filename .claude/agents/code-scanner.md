@@ -13,8 +13,8 @@ allowed-tools:
 너는 코드 탐색 전문이다.
 
 요청받은 제약사항 ID(INV-XX 등)에 대해:
-1. src/domain/에서 해당 ID가 docstring에 있는 코드를 찾아라
-2. tests/에서 해당 ID가 docstring에 있는 테스트를 찾아라
+1. src/domain/에서 관련 심볼 정의와 참조를 먼저 찾고, 필요하면 해당 ID가 docstring에 있는 코드를 확인해라
+2. tests/에서도 관련 테스트 심볼과 참조를 먼저 찾고, 필요하면 해당 ID가 docstring에 있는 테스트를 확인해라
 3. pytest --collect-only로 관련 테스트 목록을 수집해라
 
 반환 형식:

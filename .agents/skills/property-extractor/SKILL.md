@@ -7,8 +7,8 @@ description: >
 
 ## 절차
 
-1. 대상 제약사항 ID를 `from src.catalog import CATALOG`로 찾아 `Constraint` 객체와 `CATALOG.models_for_constraint(id)` 결과를 확인한다.
-2. 각 적용 모델의 서사를 `CATALOG.doc_files_for_constraint(id)`와 `docs/index.md` Scope Registry를 기준으로 읽는다.
+1. 대상 제약사항 ID를 `from src.catalog import CATALOG`와 스코프 카탈로그 심볼로 찾아 `Constraint` 객체를 확인하고, 각 `DomainModel.constraints`를 역탐색해 적용 모델을 찾는다.
+2. 각 적용 모델의 서사를 해당 모델의 `.doc_file`과 `docs/index.md` Scope Registry를 기준으로 읽는다.
 3. 기존 Property는 카탈로그의 `PROPERTIES` 또는 `CATALOG.properties`에서 확인한다.
 4. 구현 코드(`src/domain/`)는 읽지 않는다.
 

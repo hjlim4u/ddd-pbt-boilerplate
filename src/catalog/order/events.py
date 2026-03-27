@@ -3,8 +3,8 @@
 from src.catalog.types import DomainEvent
 
 
-ORDER_EVENT_ORDER_CREATED = DomainEvent(
-    id="ORDER_EVENT_ORDER_CREATED",
+ORD_EV_ORDER_CREATED = DomainEvent(
+    id="ORD_EV_ORDER_CREATED",
     name="OrderCreated",
     scope="@order",
     payload=("order_id", "customer_id", "order_lines[]", "timestamp"),
@@ -12,8 +12,8 @@ ORDER_EVENT_ORDER_CREATED = DomainEvent(
     subsequent="재고 배정 시작",
 )
 
-ORDER_EVENT_ORDER_CANCELLED = DomainEvent(
-    id="ORDER_EVENT_ORDER_CANCELLED",
+ORD_EV_ORDER_CANCELLED = DomainEvent(
+    id="ORD_EV_ORDER_CANCELLED",
     name="OrderCancelled",
     scope="@order",
     payload=("order_id", "reason", "timestamp"),
@@ -21,8 +21,8 @@ ORDER_EVENT_ORDER_CANCELLED = DomainEvent(
     subsequent="배정된 재고 해제",
 )
 
-ORDER_EVENT_OUT_OF_STOCK = DomainEvent(
-    id="ORDER_EVENT_OUT_OF_STOCK",
+ORD_EV_OUT_OF_STOCK = DomainEvent(
+    id="ORD_EV_OUT_OF_STOCK",
     name="OutOfStock",
     scope="@order",
     payload=("sku", "requested_quantity", "timestamp"),
@@ -31,14 +31,14 @@ ORDER_EVENT_OUT_OF_STOCK = DomainEvent(
 )
 
 EVENTS: tuple[DomainEvent, ...] = (
-    ORDER_EVENT_ORDER_CREATED,
-    ORDER_EVENT_ORDER_CANCELLED,
-    ORDER_EVENT_OUT_OF_STOCK,
+    ORD_EV_ORDER_CREATED,
+    ORD_EV_ORDER_CANCELLED,
+    ORD_EV_OUT_OF_STOCK,
 )
 
 __all__ = [
     "EVENTS",
-    "ORDER_EVENT_ORDER_CANCELLED",
-    "ORDER_EVENT_ORDER_CREATED",
-    "ORDER_EVENT_OUT_OF_STOCK",
+    "ORD_EV_ORDER_CANCELLED",
+    "ORD_EV_ORDER_CREATED",
+    "ORD_EV_OUT_OF_STOCK",
 ]

@@ -9,14 +9,14 @@ description: >
 
 ## 절차
 
-1. `from src.catalog import CATALOG`를 기준으로 대상 ID(order_model_order, order_constraint_money_amount_non_negative, order_property_batch_allocation_idempotent 등)에 해당하는 객체를 찾는다.
+1. `from src.catalog import CATALOG`와 `from src.catalog import <scope>` 심볼을 기준으로 대상 ID(ORD_E_ORDER, ORD_INV_MONEY_AMOUNT_NONNEG, ORD_P_BATCH_ALLOC_IDEMPOTENT 등)에 해당하는 객체를 찾는다.
 2. 찾은 객체의 필드에서 관련 ID 목록을 수집한다:
    - DomainModel: `.constraints`, `.properties`, `.events`, `.depends_on`, `.doc_file`
-   - Constraint: 역참조로 연결된 모델 목록, `CATALOG.doc_files_for_constraint(id)`
-   - Property: `.source`, `.test_file`, `CATALOG.doc_files_for_property(id)`
+   - Constraint: 카탈로그의 각 `DomainModel.constraints`를 역탐색해 연결된 모델과 `doc_file`을 모은다.
+   - Property: `.source`, `.test_file`을 읽고, 카탈로그의 각 `DomainModel.properties`를 역탐색해 관련 `doc_file`을 모은다.
 3. 문서 경로는 `docs/index.md`의 Scope Registry와 카탈로그의 `doc_file`을 우선 사용한다.
 4. 필요한 `docs/<scope>/*.md`만 읽어 필드·불변 조건·정책·이벤트·Property 관점을 파악한다.
-   - 여러 모델에 걸친 제약(order_constraint_order_cancellation_releases_allocations 등)은 `CATALOG.doc_files_for_constraint(id)`로 여러 문서를 함께 읽는다.
+   - 여러 모델에 걸친 제약(ORD_POL_ORDER_CANCEL_RELEASES_ALLOC 등)은 역탐색으로 수집한 여러 `doc_file`을 함께 읽는다.
 5. 카탈로그의 `test_file` 필드로 테스트 파일 존재 여부를 확인한다.
 6. `src/domain/`에서 관련 구현 코드가 있는지 확인한다.
 

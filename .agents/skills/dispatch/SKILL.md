@@ -10,7 +10,7 @@ description: >
 1. `.task/context.md`에 관련 부분만 발췌한다.
 2. `.task/prompt.md`에 프롬프트를 작성한다.
 3. 호출:
-   - 읽기 전용: claude -p "$(cat .task/prompt.md)" --allowedTools "Read,Bash(grep *)"
+   - 읽기 전용: claude -p "$(cat .task/prompt.md)" --allowedTools "Read"
    - 파일 수정: claude -p "$(cat .task/prompt.md)" --allowedTools "Read,Edit,Write,Bash(pytest *)"
 
 ## Gemini CLI 호출
@@ -21,15 +21,16 @@ description: >
 ## 컨텍스트 발췌 원칙
 
 - 먼저 `src/catalog/`의 `CATALOG`에서 관련 `doc_file`, `test_file`을 찾는다.
-- Claude Code에게는 필요한 파일에서 관련 ID나 도메인 용어가 있는 부분만 발췌한다.
+- 카탈로그와 구현 코드는 조회 API 대신 LSP 심볼 탐색으로 관련 객체와 경로를 먼저 좁힌다.
+- Claude Code에게는 이렇게 좁혀진 파일에서 관련 ID나 도메인 용어가 있는 부분만 발췌한다.
 - Gemini에게는 파일 경로만 전달하고 직접 읽게 한다.
 
 ## 컨텍스트 발췌 예시
 
-개념별 서사는 `docs/<scope>/*.md`에 있다. 제약 ID와 도메인 용어를 함께 grep한다.
+개념별 서사는 `docs/<scope>/*.md`에 있다. 경로는 카탈로그 심볼과 `doc_file`로 먼저 확정하고, 필요한 ID와 도메인 용어 주변만 텍스트로 발췌한다.
 
 ```bash
-# Batch 관련 (INV-01, POL-03 등)
+# Batch 관련 (문서 경로는 catalog/LSP로 먼저 확정)
 grep -E "INV-01|POL-03|주문 취소" docs/order/batch.md > .task/context.md
 grep -E "POL-03|주문 취소" docs/order/order.md >> .task/context.md
 ```
@@ -46,5 +47,6 @@ Select-String -Path docs/order/batch.md -Pattern "INV-01|POL-03|주문 취소" -
 - Claude Code에게는 발췌하여 전달한다.
 - Gemini에게는 파일 경로만 전달한다.
 - 경로는 `docs/index.md` Scope Registry와 카탈로그 메타데이터를 기준으로 찾는다.
+- 코드 탐색은 심볼/LSP 우선, 텍스트 검색은 markdown 발췌와 raw ID 확인의 보조 수단으로만 쓴다.
 - sub-agent에게 다른 sub-agent의 존재를 알리지 않는다.
 - 작업 완료 후 `.task/` 디렉토리를 비운다: `rm -rf .task/*`

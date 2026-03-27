@@ -1,4 +1,4 @@
-"""Order 예제 기반 TDD. order_property_order_requires_at_least_one_order_line (Mixed), order_constraint_order_creation_publishes_order_created, order_constraint_order_cancellation_releases_allocations."""
+"""Order 예제 기반 TDD. ORD_P_ORDER_REQUIRES_ORDER_LINE (Mixed), ORD_POL_ORDER_CREATE_EMITS_ORDER_CREATED, ORD_POL_ORDER_CANCEL_RELEASES_ALLOC."""
 
 from datetime import date
 
@@ -9,12 +9,12 @@ from src.domain.models import Batch, Order, OrderLine
 from src.domain.services import allocate, cancel_order
 
 # ──────────────────────────────────────────────
-# order_property_order_requires_at_least_one_order_line: Order 최소 항목 — Mixed의 TDD 부분 (INorder_model_order_line)
+# ORD_P_ORDER_REQUIRES_ORDER_LINE: Order 최소 항목 — Mixed의 TDD 부분 (ORD_INV_ORDER_REQUIRES_ORDER_LINE)
 # ──────────────────────────────────────────────
 
 
 class TestOrderCreation:
-    """INorder_model_order_line: Order는 최소 1개의 OrderLine을 가져야 한다."""
+    """ORD_INV_ORDER_REQUIRES_ORDER_LINE: Order는 최소 1개의 OrderLine을 가져야 한다."""
 
     def test_empty_order_raises(self) -> None:
         with pytest.raises(InvalidOrderError):
@@ -35,12 +35,12 @@ class TestOrderCreation:
 
 
 # ──────────────────────────────────────────────
-# order_constraint_order_cancellation_releases_allocations: 주문 취소 시 배정 해제 — TDD 시나리오
+# ORD_POL_ORDER_CANCEL_RELEASES_ALLOC: 주문 취소 시 배정 해제 — TDD 시나리오
 # ──────────────────────────────────────────────
 
 
 class TestCancelOrder:
-    """order_constraint_order_cancellation_releases_allocations: 주문 취소 시 모든 배정이 해제되어야 한다."""
+    """ORD_POL_ORDER_CANCEL_RELEASES_ALLOC: 주문 취소 시 모든 배정이 해제되어야 한다."""
 
     def test_cancel_releases_single_allocation(self) -> None:
         batch = Batch("B-001", "WIDGET", 50, eta=date(2024, 1, 1))
@@ -89,7 +89,7 @@ class TestCancelOrder:
 
 
 class TestAllocateService:
-    """order_constraint_allocation_requires_matching_sku + INorder_model_money 통합 시나리오."""
+    """ORD_POL_ALLOC_REQUIRES_MATCHING_SKU + ORD_INV_BATCH_AVAILABLE_QUANTITY_NONNEG 통합 시나리오."""
 
     def test_allocate_to_earliest_batch(self) -> None:
         early = Batch("B-EARLY", "WIDGET", 50, eta=date(2024, 1, 1))

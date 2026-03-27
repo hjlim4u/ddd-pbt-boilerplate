@@ -3,69 +3,69 @@
 from src.catalog.types import DomainModel, ModelField
 
 from .constraints import (
-    ORDER_CONSTRAINT_ALLOCATION_REQUIRES_MATCHING_SKU,
-    ORDER_CONSTRAINT_BATCH_ALLOCATION_IDEMPOTENT,
-    ORDER_CONSTRAINT_BATCH_AVAILABLE_QUANTITY_NON_NEGATIVE,
-    ORDER_CONSTRAINT_CURRENCY_IS_ISO_4217_UPPERCASE,
-    ORDER_CONSTRAINT_MONEY_AMOUNT_NON_NEGATIVE,
-    ORDER_CONSTRAINT_ORDER_CANCELLATION_RELEASES_ALLOCATIONS,
-    ORDER_CONSTRAINT_ORDER_CREATION_PUBLISHES_ORDER_CREATED,
-    ORDER_CONSTRAINT_ORDER_REQUIRES_AT_LEAST_ONE_ORDER_LINE,
-    ORDER_CONSTRAINT_SKU_IS_UPPERCASE_ALNUM_HYPHEN_MAX_20,
+    ORD_FMT_MONEY_CURRENCY_ISO4217_UPPER,
+    ORD_FMT_ORDER_LINE_SKU_UPPER_ALNUM_HYPHEN_MAX20,
+    ORD_INV_BATCH_ALLOC_IDEMPOTENT,
+    ORD_INV_BATCH_AVAILABLE_QUANTITY_NONNEG,
+    ORD_INV_MONEY_AMOUNT_NONNEG,
+    ORD_INV_ORDER_REQUIRES_ORDER_LINE,
+    ORD_POL_ALLOC_REQUIRES_MATCHING_SKU,
+    ORD_POL_ORDER_CANCEL_RELEASES_ALLOC,
+    ORD_POL_ORDER_CREATE_EMITS_ORDER_CREATED,
 )
-from .events import ORDER_EVENT_ORDER_CANCELLED, ORDER_EVENT_ORDER_CREATED, ORDER_EVENT_OUT_OF_STOCK
+from .events import ORD_EV_ORDER_CANCELLED, ORD_EV_ORDER_CREATED, ORD_EV_OUT_OF_STOCK
 from .properties import (
-    ORDER_PROPERTY_ALLOCATION_REQUIRES_MATCHING_SKU,
-    ORDER_PROPERTY_BATCH_ALLOCATION_IDEMPOTENT,
-    ORDER_PROPERTY_BATCH_AVAILABLE_QUANTITY_NON_NEGATIVE,
-    ORDER_PROPERTY_MONEY_ADDITION_IS_COMMUTATIVE,
-    ORDER_PROPERTY_MONEY_SERIALIZATION_ROUND_TRIP,
-    ORDER_PROPERTY_ORDER_LINE_SKU_FORMAT_VALIDATION,
-    ORDER_PROPERTY_ORDER_REQUIRES_AT_LEAST_ONE_ORDER_LINE,
+    ORD_P_ALLOC_REQUIRES_MATCHING_SKU,
+    ORD_P_BATCH_ALLOC_IDEMPOTENT,
+    ORD_P_BATCH_AVAILABLE_QUANTITY_NONNEG,
+    ORD_P_MONEY_ADDITION_COMMUTATIVE,
+    ORD_P_MONEY_SERIALIZATION_ROUND_TRIP,
+    ORD_P_ORDER_LINE_SKU_FORMAT_VALIDATION,
+    ORD_P_ORDER_REQUIRES_ORDER_LINE,
 )
 
 
-ORDER_MODEL_MONEY = DomainModel(
-    id="ORDER_MODEL_MONEY",
+ORD_V_MONEY = DomainModel(
+    id="ORD_V_MONEY",
     name="Money",
     model_type="ValueObject",
     scope="@order",
     fields=(
-        ModelField("ORDER_MODEL_MONEY_FIELD_AMOUNT", "amount", "Decimal", ">= 0, 소수점 2자리"),
-        ModelField("ORDER_MODEL_MONEY_FIELD_CURRENCY", "currency", "str", "ISO 4217 3자리"),
+        ModelField("ORD_F_MONEY_AMOUNT", "amount", "Decimal", ">= 0, 소수점 2자리"),
+        ModelField("ORD_F_MONEY_CURRENCY", "currency", "str", "ISO 4217 3자리"),
     ),
     doc_file="docs/order/money.md",
-    constraints=(ORDER_CONSTRAINT_MONEY_AMOUNT_NON_NEGATIVE, ORDER_CONSTRAINT_CURRENCY_IS_ISO_4217_UPPERCASE),
-    properties=(ORDER_PROPERTY_MONEY_SERIALIZATION_ROUND_TRIP, ORDER_PROPERTY_MONEY_ADDITION_IS_COMMUTATIVE),
+    constraints=(ORD_INV_MONEY_AMOUNT_NONNEG, ORD_FMT_MONEY_CURRENCY_ISO4217_UPPER),
+    properties=(ORD_P_MONEY_SERIALIZATION_ROUND_TRIP, ORD_P_MONEY_ADDITION_COMMUTATIVE),
 )
 
-ORDER_MODEL_ORDER_LINE = DomainModel(
-    id="ORDER_MODEL_ORDER_LINE",
+ORD_V_ORDER_LINE = DomainModel(
+    id="ORD_V_ORDER_LINE",
     name="OrderLine",
     model_type="ValueObject",
     scope="@order",
     fields=(
-        ModelField("ORDER_MODEL_ORDER_LINE_FIELD_ORDER_ID", "order_id", "str", ""),
-        ModelField("ORDER_MODEL_ORDER_LINE_FIELD_SKU", "sku", "str", "대문자 영숫자+하이픈, 최대 20자"),
-        ModelField("ORDER_MODEL_ORDER_LINE_FIELD_QUANTITY", "quantity", "int", "> 0"),
+        ModelField("ORD_F_ORDER_LINE_ORDER_ID", "order_id", "str", ""),
+        ModelField("ORD_F_ORDER_LINE_SKU", "sku", "str", "대문자 영숫자+하이픈, 최대 20자"),
+        ModelField("ORD_F_ORDER_LINE_QUANTITY", "quantity", "int", "> 0"),
     ),
     doc_file="docs/order/orderline.md",
-    constraints=(ORDER_CONSTRAINT_SKU_IS_UPPERCASE_ALNUM_HYPHEN_MAX_20,),
-    properties=(ORDER_PROPERTY_ORDER_LINE_SKU_FORMAT_VALIDATION,),
+    constraints=(ORD_FMT_ORDER_LINE_SKU_UPPER_ALNUM_HYPHEN_MAX20,),
+    properties=(ORD_P_ORDER_LINE_SKU_FORMAT_VALIDATION,),
 )
 
-ORDER_MODEL_ORDER = DomainModel(
-    id="ORDER_MODEL_ORDER",
+ORD_E_ORDER = DomainModel(
+    id="ORD_E_ORDER",
     name="Order",
     model_type="Entity",
     scope="@order",
     fields=(
-        ModelField("ORDER_MODEL_ORDER_FIELD_ID", "id", "str", "UUID"),
-        ModelField("ORDER_MODEL_ORDER_FIELD_CUSTOMER_ID", "customer_id", "str", ""),
-        ModelField("ORDER_MODEL_ORDER_FIELD_ORDER_LINES", "order_lines", "list[OrderLine]", "최소 1개"),
-        ModelField("ORDER_MODEL_ORDER_FIELD_CREATED_AT", "created_at", "datetime", ""),
+        ModelField("ORD_F_ORDER_ID", "id", "str", "UUID"),
+        ModelField("ORD_F_ORDER_CUSTOMER_ID", "customer_id", "str", ""),
+        ModelField("ORD_F_ORDER_ORDER_LINES", "order_lines", "list[OrderLine]", "최소 1개"),
+        ModelField("ORD_F_ORDER_CREATED_AT", "created_at", "datetime", ""),
         ModelField(
-            "ORDER_MODEL_ORDER_FIELD_PENDING_EVENTS",
+            "ORD_F_ORDER_PENDING_EVENTS",
             "pending_events",
             "list[OrderCreated | OrderCancelled]",
             "",
@@ -73,28 +73,28 @@ ORDER_MODEL_ORDER = DomainModel(
     ),
     doc_file="docs/order/order.md",
     constraints=(
-        ORDER_CONSTRAINT_ORDER_REQUIRES_AT_LEAST_ONE_ORDER_LINE,
-        ORDER_CONSTRAINT_ORDER_CREATION_PUBLISHES_ORDER_CREATED,
-        ORDER_CONSTRAINT_ORDER_CANCELLATION_RELEASES_ALLOCATIONS,
+        ORD_INV_ORDER_REQUIRES_ORDER_LINE,
+        ORD_POL_ORDER_CREATE_EMITS_ORDER_CREATED,
+        ORD_POL_ORDER_CANCEL_RELEASES_ALLOC,
     ),
-    properties=(ORDER_PROPERTY_ORDER_REQUIRES_AT_LEAST_ONE_ORDER_LINE,),
-    events=(ORDER_EVENT_ORDER_CREATED, ORDER_EVENT_ORDER_CANCELLED),
-    depends_on=(ORDER_MODEL_MONEY, ORDER_MODEL_ORDER_LINE),
+    properties=(ORD_P_ORDER_REQUIRES_ORDER_LINE,),
+    events=(ORD_EV_ORDER_CREATED, ORD_EV_ORDER_CANCELLED),
+    depends_on=(ORD_V_MONEY, ORD_V_ORDER_LINE),
 )
 
-ORDER_MODEL_BATCH = DomainModel(
-    id="ORDER_MODEL_BATCH",
+ORD_E_BATCH = DomainModel(
+    id="ORD_E_BATCH",
     name="Batch",
     model_type="Entity",
     scope="@order",
     fields=(
-        ModelField("ORDER_MODEL_BATCH_FIELD_REFERENCE", "reference", "str", "고유 식별자"),
-        ModelField("ORDER_MODEL_BATCH_FIELD_SKU", "sku", "str", ""),
-        ModelField("ORDER_MODEL_BATCH_FIELD_PURCHASED_QUANTITY", "purchased_quantity", "int", "> 0"),
-        ModelField("ORDER_MODEL_BATCH_FIELD_ETA", "eta", "date | None", ""),
-        ModelField("ORDER_MODEL_BATCH_FIELD_ALLOCATIONS", "allocations", "set[OrderLine]", ""),
+        ModelField("ORD_F_BATCH_REFERENCE", "reference", "str", "고유 식별자"),
+        ModelField("ORD_F_BATCH_SKU", "sku", "str", ""),
+        ModelField("ORD_F_BATCH_PURCHASED_QUANTITY", "purchased_quantity", "int", "> 0"),
+        ModelField("ORD_F_BATCH_ETA", "eta", "date | None", ""),
+        ModelField("ORD_F_BATCH_ALLOCATIONS", "allocations", "set[OrderLine]", ""),
         ModelField(
-            "ORDER_MODEL_BATCH_FIELD_PENDING_EVENTS",
+            "ORD_F_BATCH_PENDING_EVENTS",
             "pending_events",
             "list[OutOfStock]",
             "",
@@ -102,31 +102,31 @@ ORDER_MODEL_BATCH = DomainModel(
     ),
     doc_file="docs/order/batch.md",
     constraints=(
-        ORDER_CONSTRAINT_BATCH_AVAILABLE_QUANTITY_NON_NEGATIVE,
-        ORDER_CONSTRAINT_BATCH_ALLOCATION_IDEMPOTENT,
-        ORDER_CONSTRAINT_ALLOCATION_REQUIRES_MATCHING_SKU,
-        ORDER_CONSTRAINT_ORDER_CANCELLATION_RELEASES_ALLOCATIONS,
+        ORD_INV_BATCH_AVAILABLE_QUANTITY_NONNEG,
+        ORD_INV_BATCH_ALLOC_IDEMPOTENT,
+        ORD_POL_ALLOC_REQUIRES_MATCHING_SKU,
+        ORD_POL_ORDER_CANCEL_RELEASES_ALLOC,
     ),
     properties=(
-        ORDER_PROPERTY_BATCH_AVAILABLE_QUANTITY_NON_NEGATIVE,
-        ORDER_PROPERTY_BATCH_ALLOCATION_IDEMPOTENT,
-        ORDER_PROPERTY_ALLOCATION_REQUIRES_MATCHING_SKU,
+        ORD_P_BATCH_AVAILABLE_QUANTITY_NONNEG,
+        ORD_P_BATCH_ALLOC_IDEMPOTENT,
+        ORD_P_ALLOC_REQUIRES_MATCHING_SKU,
     ),
-    events=(ORDER_EVENT_ORDER_CANCELLED, ORDER_EVENT_OUT_OF_STOCK),
-    depends_on=(ORDER_MODEL_ORDER_LINE,),
+    events=(ORD_EV_ORDER_CANCELLED, ORD_EV_OUT_OF_STOCK),
+    depends_on=(ORD_V_ORDER_LINE,),
 )
 
 MODELS: tuple[DomainModel, ...] = (
-    ORDER_MODEL_MONEY,
-    ORDER_MODEL_ORDER_LINE,
-    ORDER_MODEL_ORDER,
-    ORDER_MODEL_BATCH,
+    ORD_V_MONEY,
+    ORD_V_ORDER_LINE,
+    ORD_E_ORDER,
+    ORD_E_BATCH,
 )
 
 __all__ = [
+    "ORD_E_BATCH",
+    "ORD_E_ORDER",
+    "ORD_V_MONEY",
+    "ORD_V_ORDER_LINE",
     "MODELS",
-    "ORDER_MODEL_BATCH",
-    "ORDER_MODEL_MONEY",
-    "ORDER_MODEL_ORDER",
-    "ORDER_MODEL_ORDER_LINE",
 ]

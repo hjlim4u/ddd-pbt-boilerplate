@@ -84,7 +84,7 @@ Orchestrator는 고정된 Phase를 따르는 것이 아니라,
 [Orchestrator의 사고]
 
 1. docs/index.md를 읽자.
-   → order_constraint_order_cancellation_releases_allocations이 이미 카탈로그에 존재한다.
+   → ORD_POL_ORDER_CANCEL_RELEASES_ALLOC이 이미 카탈로그에 존재한다.
 
 2. `src/catalog/`의 Property와 관련 모델의 `doc_file`을 보자.
    → 해당 Property의 test_file이 존재하는지 확인한다.
@@ -98,7 +98,7 @@ Orchestrator는 고정된 Phase를 따르는 것이 아니라,
    - 테스트와 구현만 필요
 
 5. 실행:
-   a. Claude Code: order_property_allocation_requires_matching_sku의 stateful PBT 작성
+   a. Claude Code: ORD_P_ALLOC_REQUIRES_MATCHING_SKU의 stateful PBT 작성
    b. Codex Worker: 구체 시나리오 TDD 작성 (병렬)
    c. Claude Code: cancel_order() 구현
    d. Codex Worker: 코드 리뷰
@@ -150,11 +150,11 @@ Orchestrator가 판단하지 않는 것:
 ## Trace: 주문 취소 기능 구현
 
 ### 상황 판단
-- order_constraint_order_cancellation_releases_allocations, order_property_allocation_requires_matching_sku이 이미 문서에 존재하지만 테스트와 구현이 없음
+- ORD_POL_ORDER_CANCEL_RELEASES_ALLOC, ORD_P_ALLOC_REQUIRES_MATCHING_SKU이 이미 문서에 존재하지만 테스트와 구현이 없음
 - 도메인 문서 변경 불필요, 테스트 + 구현만 필요
 
 ### 실행
-1. Claude Code에게 order_property_allocation_requires_matching_sku stateful PBT 작성 요청 → 4 properties
+1. Claude Code에게 ORD_P_ALLOC_REQUIRES_MATCHING_SKU stateful PBT 작성 요청 → 4 properties
 2. Codex Worker에게 취소 시나리오 TDD 작성 요청 (병렬) → 3 examples
 3. 전체 테스트 → RED (7 FAILED)
 4. Claude Code에게 구현 요청 → cancel_order() 추가

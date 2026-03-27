@@ -14,9 +14,9 @@ description: >
    impact = CATALOG.impact_of("INV-03")
    # → {"models": (...), "constraints": (...), "properties": (...), "events": (...)}
    ```
-3. 반환된 각 ID에 대해 `CATALOG.get_*`, `CATALOG.doc_file_for_model()`, `CATALOG.doc_files_for_constraint()` 등으로 문서 경로를 확인한다.
-4. `src/domain/`에서 이 ID가 docstring에 언급된 구현 코드를 찾는다.
-5. `tests/`에서 이 ID가 docstring에 언급된 테스트를 찾는다.
+3. 반환된 각 ID에 대해 스코프 카탈로그 심볼과 `DomainModel.doc_file`을 직접 읽어 문서 경로를 확인한다. 제약사항과 Property는 각 `DomainModel.constraints` / `DomainModel.properties` 역탐색으로 연결 문서를 모은다.
+4. `src/domain/`에서는 관련 심볼 정의·참조를 우선 찾고, 필요하면 docstring의 ID 문자열을 보조 검색한다.
+5. `tests/`에서도 관련 테스트 심볼과 참조를 우선 찾고, 필요하면 ID 문자열을 보조 검색한다.
 
 ## 반환 형식
 
@@ -33,5 +33,5 @@ description: >
 
 ## 주의
 
-- 영향 조회의 1차 정본은 `src/catalog/`다. docs/ grep은 경로와 구현 확인용 보조 단계다.
-- 구현·테스트 코드에서 ID를 grep하는 것은 여전히 유효하다.
+- 영향 조회의 1차 정본은 `src/catalog/`다. 카탈로그와 구현 탐색은 LSP 심볼/참조 탐색을 우선 사용한다.
+- 텍스트 검색은 markdown 서사 발췌나 docstring의 raw ID 확인이 필요할 때만 보조적으로 사용한다.

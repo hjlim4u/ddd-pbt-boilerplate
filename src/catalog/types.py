@@ -4,6 +4,8 @@
 도메인 개념을 Python 객체로 표현하여 LSP/AST 기반 탐색을 지원한다.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 
@@ -12,7 +14,7 @@ class ModelField:
     """도메인 모델의 단일 필드 정의."""
 
     id: str
-    """필드 ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
+    """필드 ID. 문서 anchor와 Python 상수명에 그대로 재사용되는 대문자 underscore 형식."""
 
     name: str
     type_hint: str
@@ -28,7 +30,7 @@ class DomainModel:
     """
 
     id: str
-    """모델 ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
+    """모델 ID. 문서 anchor와 Python 상수명에 그대로 재사용되는 대문자 underscore 형식."""
 
     name: str
     """Python 클래스 이름과 일치하는 모델 이름."""
@@ -67,7 +69,7 @@ class Constraint:
     """
 
     id: str
-    """제약사항 ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
+    """제약사항 ID. 문서 anchor와 Python 상수명에 그대로 재사용되는 대문자 underscore 형식."""
 
     category: str
     """'invariant' | 'policy' | 'format'."""
@@ -85,7 +87,7 @@ class Property:
     """
 
     id: str
-    """Property ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
+    """Property ID. 문서 anchor와 Python 상수명에 그대로 재사용되는 대문자 underscore 형식."""
 
     name: str
     """Property 이름."""
@@ -115,7 +117,7 @@ class DomainEvent:
     """
 
     id: str
-    """이벤트 ID이자 정본 문서 앵커 키. Python 변수명으로 사용 가능한 snake_case 형식."""
+    """이벤트 ID. 문서 anchor와 Python 상수명에 그대로 재사용되는 대문자 underscore 형식."""
 
     name: str
     """Python 클래스 이름과 일치하는 이벤트 이름."""

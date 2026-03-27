@@ -46,9 +46,9 @@ Gemini CLI의 1M 컨텍스트가 이 작업에 적합하다.
 ```json
 {
   "status": "PASS | ISSUES_FOUND | ERROR",
-  "catalog_errors": ["order_model_order.constraints → INV-99 not defined in catalog"],
-  "missing_tests": ["INV-XX — no test references this ID"],
-  "orphan_ids": ["P-XXX — no constraint references it"],
-  "unconstrained_code": ["INV-99 — in code but not in catalog"]
+  "catalog_errors": ["ORD_E_ORDER.constraints → ORD_INV_UNKNOWN not defined in catalog"],
+  "missing_tests": ["ORD_INV_SAMPLE_RULE — no test references this ID"],
+  "orphan_ids": ["ORD_P_SAMPLE_RULE — no constraint references it"],
+  "unconstrained_code": ["ORD_INV_UNKNOWN — in code but not in catalog"]
 }
 ```

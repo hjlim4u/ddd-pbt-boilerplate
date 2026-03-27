@@ -104,7 +104,7 @@ Subagent는 별도의 컨텍스트 윈도우에서 탐색하고,
 
 ### Claude Code 내장 subagent
 
-- **Explore**: 읽기 전용 탐색. "src/domain/에서 INorder_model_money을 참조하는 코드를 찾아줘"
+- **Explore**: 읽기 전용 탐색. "src/domain/에서 ORD_INV_BATCH_AVAILABLE_QUANTITY_NONNEG을 참조하는 코드를 찾아줘"
 - **Plan**: Plan Mode에서 자동 사용. 구현 전 코드 구조 파악
 
 ### 커스텀 subagent
@@ -121,12 +121,17 @@ skills: [domain-scout]  # ← domain-scout skill이 preload됨
 `skills: [domain-scout]`로 선언하면 subagent 시작 시
 domain-scout의 전체 내용이 subagent의 컨텍스트에 주입된다.
 메인 에이전트의 컨텍스트는 깨끗하게 유지된다.
+여기서 `grep`은 markdown 발췌용 fallback일 뿐이고,
+경로 탐색의 1차 수단은 domain-scout가 안내하는 catalog/LSP 심볼 추적이다.
 
 **code-scanner** — 코드/테스트 현황 파악
 ```markdown
 # .claude/agents/code-scanner.md
 allowed-tools: [Read, "Bash(grep:*)", "Bash(find:*)", "Bash(pytest:--collect-only*)"]
 ```
+
+이 subagent도 구현과 테스트 위치를 먼저 심볼/참조 기준으로 좁히고,
+raw ID 문자열 검색은 docstring 확인이 필요할 때만 사용한다.
 
 ## 에이전트가 컨텍스트를 찾는 흐름
 

@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 def extract_ids(text: str, prefix: str) -> set[str]:
-    return set(re.findall(rf"{prefix}-\d+", text))
+    return set(re.findall(rf"\b[A-Z0-9]+_{prefix}_[A-Z0-9_]+\b", text))
 
 
 def parse_frontmatter(text: str) -> dict | None:
@@ -108,7 +108,7 @@ def check(project_root: Path | None = None) -> dict:
 
     # ── Check 2: Property.source → Constraint/Model 추적 가능성 ──────────
     for prop in CATALOG.properties:
-        if not CATALOG.models_for_property(prop.id):
+        if not any(prop in model.properties for model in CATALOG.models):
             results["catalog_errors"].append(
                 f"{prop.id} → source constraints do not resolve to any model"
             )
